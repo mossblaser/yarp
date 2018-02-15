@@ -1,0 +1,11 @@
+*.pyc
+*.swp
+*.swo
+~*
+
+# Python nonsense
+bin/
+include/
+lib/
+pip-selfcheck.json
+*.egg-info/
