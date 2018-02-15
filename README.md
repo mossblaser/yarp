@@ -93,15 +93,15 @@ its use in more sophisticated applications.
 The [ReactiveX](http://reactivex.io/) [RxPY](https://github.com/ReactiveX/RxPY)
 library is a particularly feature-rich reactive programming library aimed at
 more 'serious' use than this library. As well as its fairly extensive library
-of built-in facilities, performance, dynamically changing graphs functions and
-error handling were considered during its design. Meanwhile `yarp` eschews all
-of this on the basis that it doesn't intend to be a comprehensive programming
-system. If in doubt, this is likely the library you want to be using, not
-`yarp`! With this said, one of RxPY's is its verbosity. Within its niche `yarp`
-can be both concise and 'obvious' in meaning.  This makes it ideal for setting
-up quick-n-dirty home automation rules.  Further, the ReactiveX model only
-supports instantaneous values while `yarp` supports both instantaneous and
-persistent values.
+of built-in facilities, performance, dynamically changing graphs of functions
+and error handling were considered during its design. Meanwhile `yarp` eschews
+all of this on the basis that it doesn't intend to be a comprehensive
+programming system. If in doubt, this is likely the library you want to be
+using, not `yarp`! With this said, one of RxPY's downsides is its verbosity.
+Within its niche `yarp` can be both concise and 'obvious' in meaning.  This
+makes it ideal for setting up quick-n-dirty home automation rules.  Further,
+the ReactiveX model only supports instantaneous values while `yarp` supports
+both instantaneous and persistent values.
 
 The
 [`metapensiero.reactive`](https://github.com/metapensiero/metapensiero.reactive)
