@@ -141,7 +141,7 @@ class TestDelayInstantaneous(object):
         
         # Trigger a change for later...
         before = time.time()
-        value.value_changed(123)
+        value.set_instantaneous_value(123)
         assert delayed_value.value is NoValue
         assert not m.mock_calls
         await evt.wait()

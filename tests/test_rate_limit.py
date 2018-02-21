@@ -72,14 +72,14 @@ async def test_rate_limit_instantaneous(event_loop):
     rlv.on_value_changed(on_change)
     
     # First change should make it through immediately
-    v.value_changed(1)
+    v.set_instantaneous_value(1)
     assert rlv.value is NoValue
     assert len(log) == 1
     assert log[-1] == 1
     await sem.acquire()
     
     # Another change made immediately after should be delayed
-    v.value_changed(2)
+    v.set_instantaneous_value(2)
     assert rlv.value is NoValue
     assert len(log) == 1
     
@@ -93,7 +93,7 @@ async def test_rate_limit_instantaneous(event_loop):
     
     # After a suitable delay, the next change should come through immediately
     await asyncio.sleep(0.15, loop=event_loop)
-    v.value_changed(3)
+    v.set_instantaneous_value(3)
     assert rlv.value is NoValue
     assert len(log) == 3
     assert log[-1] == 3
@@ -101,9 +101,9 @@ async def test_rate_limit_instantaneous(event_loop):
     
     # A rapid succession of calls should result in only the last value
     # comming out, and then only after a delay
-    v.value_changed(4)
-    v.value_changed(5)
-    v.value_changed(6)
+    v.set_instantaneous_value(4)
+    v.set_instantaneous_value(5)
+    v.set_instantaneous_value(6)
     assert rlv.value is NoValue
     assert len(log) == 3
     before = time.time()

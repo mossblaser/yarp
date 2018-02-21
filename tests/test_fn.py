@@ -85,12 +85,12 @@ def test_inst_positional_args():
     # Changes should propagate, callbacks should fire but no value should be
     # stored
     m.reset_mock()
-    a_value.value_changed(123)
+    a_value.set_instantaneous_value(123)
     m.assert_called_once_with(((123, NoValue), {}))
     assert result.value is NoValue
     
     m.reset_mock()
-    b_value.value_changed(123)
+    b_value.set_instantaneous_value(123)
     m.assert_called_once_with(((NoValue, 123), {}))
     assert result.value is NoValue
 
@@ -113,11 +113,11 @@ def test_inst_positional_kwargs():
     # Changes should propagate, callbacks should fire but no value should be
     # stored
     m.reset_mock()
-    a_value.value_changed(123)
+    a_value.set_instantaneous_value(123)
     m.assert_called_once_with(((), {"a": 123, "b": NoValue}))
     assert result.value is NoValue
     
     m.reset_mock()
-    b_value.value_changed(123)
+    b_value.set_instantaneous_value(123)
     m.assert_called_once_with(((), {"a": NoValue, "b": 123}))
     assert result.value is NoValue

@@ -1,8 +1,8 @@
 from mock import Mock
 
 from yarp import \
-    NoValue, Value, ListValue, DictValue, ensure_value, make_persistent, \
-    make_instantaneous
+    NoValue, Value, ListValue, TupleValue, DictValue, ensure_value, \
+    make_persistent, make_instantaneous
 
 
 def test_initial_value_default():
@@ -28,7 +28,7 @@ def test_change_callback_only():
     v = Value()
     v.on_value_changed(m)
     
-    v.value_changed(123)
+    v.set_instantaneous_value(123)
     m.assert_called_once_with(123)
     assert v.value is NoValue
 
@@ -83,14 +83,74 @@ def test_list_value_instantaneous():
     
     # Instantaneous values should propagate only into the callback
     m.reset_mock()
-    b.value_changed("b")
+    b.set_instantaneous_value("b")
     assert lst.value == ["A", NoValue, NoValue]
     m.assert_called_once_with(["A", "b", NoValue])
     
     m.reset_mock()
-    c.value_changed("c")
+    c.set_instantaneous_value("c")
     assert lst.value == ["A", NoValue, NoValue]
     m.assert_called_once_with(["A", NoValue, "c"])
+
+
+def test_tuple_value_persistent():
+    a = Value("a")
+    b = Value("b")
+    c = Value("c")
+    
+    tup = TupleValue((a, b, c))
+    
+    # Initial value should have passed through
+    assert tup.value == ("a", "b", "c")
+    
+    m = Mock()
+    tup.on_value_changed(m)
+    
+    # Changes should propagate through
+    a.value = "A"
+    assert tup.value == ("A", "b", "c")
+    m.assert_called_once_with(("A", "b", "c"))
+    
+    m.reset_mock()
+    b.value = "B"
+    assert tup.value == ("A", "B", "c")
+    m.assert_called_once_with(("A", "B", "c"))
+    
+    m.reset_mock()
+    c.value = "C"
+    assert tup.value == ("A", "B", "C")
+    m.assert_called_once_with(("A", "B", "C"))
+
+
+def test_tuple_value_instantaneous():
+    # A mix of instantaneous and continuous
+    a = Value("a")
+    b = Value()
+    c = Value()
+    
+    tup = TupleValue([a, b, c])
+    
+    # Initial value should have passed through
+    assert tup.value == ("a", NoValue, NoValue)
+    
+    m = Mock()
+    tup.on_value_changed(m)
+    
+    # Changes should propagate through
+    a.value = "A"
+    assert tup.value == ("A", NoValue, NoValue)
+    m.assert_called_once_with(("A", NoValue, NoValue))
+    
+    # Instantaneous values should propagate only into the callback
+    m.reset_mock()
+    b.set_instantaneous_value("b")
+    assert tup.value == ("A", NoValue, NoValue)
+    m.assert_called_once_with(("A", "b", NoValue))
+    
+    m.reset_mock()
+    c.set_instantaneous_value("c")
+    assert tup.value == ("A", NoValue, NoValue)
+    m.assert_called_once_with(("A", NoValue, "c"))
 
 
 def test_dict_value_persistent():
@@ -143,12 +203,12 @@ def test_dict_value_instantaneous():
     
     # Instantaneous values should propagate only into the callback
     m.reset_mock()
-    b.value_changed("b")
+    b.set_instantaneous_value("b")
     assert dct.value == {"a": "A", "b": NoValue, "c": NoValue}
     m.assert_called_once_with({"a": "A", "b": "b", "c": NoValue})
     
     m.reset_mock()
-    c.value_changed("c")
+    c.set_instantaneous_value("c")
     assert dct.value == {"a": "A", "b": NoValue, "c": NoValue}
     m.assert_called_once_with({"a": "A", "b": NoValue, "c": "c"})
 
@@ -172,6 +232,17 @@ def test_ensure_value_list():
     
     b.value = 789
     assert v.value == [123, 789]
+
+def test_ensure_value_tuple():
+    a = 123
+    b = Value(456)
+    
+    v = ensure_value((a, b))
+    assert isinstance(v, Value)
+    assert v.value == (123, 456)
+    
+    b.value = 789
+    assert v.value == (123, 789)
 
 def test_ensure_value_dict():
     a = 123
@@ -221,6 +292,6 @@ def test_make_persistent():
     
     assert pv.value is NoValue
     
-    v.value_changed(2)
+    v.set_instantaneous_value(2)
     assert pv.value == 2
     m.assert_called_once_with(2)

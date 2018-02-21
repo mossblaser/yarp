@@ -32,17 +32,17 @@ def test_no_repeat_instantaneous():
     nrv.on_value_changed(m)
     
     # New value should pass through
-    v.value_changed(1)
+    v.set_instantaneous_value(1)
     m.assert_called_once_with(1)
     assert nrv.value is NoValue
     
     # Repeat should not
     m.reset_mock()
-    v.value_changed(1)
+    v.set_instantaneous_value(1)
     assert not m.called
     assert nrv.value is NoValue
     
     # New value should pass through
-    v.value_changed(2)
+    v.set_instantaneous_value(2)
     m.assert_called_once_with(2)
     assert nrv.value is NoValue

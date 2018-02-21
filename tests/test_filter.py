@@ -72,12 +72,12 @@ def test_change_instantaneous():
     fl.on_value_changed(m)
     assert fl.value is NoValue
     
-    v.value_changed(2)
+    v.set_instantaneous_value(2)
     assert fl.value is NoValue
     m.assert_called_once_with(2)
     
     # Above ten, shouldn't get through
-    v.value_changed(100)
+    v.set_instantaneous_value(100)
     assert fl.value is NoValue
     m.assert_called_once_with(2)
 
