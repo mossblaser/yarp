@@ -9,3 +9,5 @@ include/
 lib/
 pip-selfcheck.json
 *.egg-info/
+
+.pytest_cache/

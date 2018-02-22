@@ -52,7 +52,7 @@ class no_repeat(Value):
     """
     Don't pass on change callbacks if the :py:class:`Value` hasn't changed.
     
-    Works for both continuous and instantaneous :py:class:`Value`s.
+    Works for both continuous and instantaneous :py:class:`Value`\ s.
     """
     
     def __init__(self, source_value):

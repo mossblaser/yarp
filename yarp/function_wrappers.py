@@ -125,7 +125,7 @@ def fn(f):
         3
     
     The wrapped function doesn't need to know anything about
-    :py:class:`Value` objects: the wrapper unpacks the :py:class:`Value`s of
+    :py:class:`Value` objects: the wrapper unpacks the :py:class:`Value`\ s of
     each argument before passing it on and automatically wrapps the return
     value in a :py:class:`Value`. (Non-:py:class:`Value` arguments passed to
     the function are automatically passed through without modification).

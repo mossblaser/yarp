@@ -17,7 +17,7 @@ class delay(Value):
     Produce a time-delayed version of a :py:class:`Value`.
     
     Supports both instantaneous and continous :py:class:`Values`. For
-    continuous :py:class:`Value`s, the initial value is set immediately.
+    continuous :py:class:`Value`\ s, the initial value is set immediately.
     
     The ``delay_seconds`` argument may be a constant or a Value giving the
     number of seconds to delay value changes. If it is increased, previously

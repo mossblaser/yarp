@@ -10,7 +10,7 @@ programming](https://en.wikipedia.org/wiki/Functional_reactive_programming).
 Motivating Example
 ------------------
 
-This programming style will be familliar to anyone who has used a spreadsheet.
+This programming style will be familiar to anyone who has used a spreadsheet.
 In a spreadsheet you can put values into cells. You can also put functions into
 cells which compute new values based on the values in other cells. The neat
 feature of spreadsheets is that if you change the value in a cell, any other
@@ -79,8 +79,8 @@ for example an ephemeral sensor reading. For example:
     
     >>> # Now lets instantaneously set the value as if a car has just gone past
     >>> # and watch as our callback is called with the speed in KM/H
-    >>> car_speed_mph.value_changed(30)
-    A car passed at 48 KM/H
+    >>> car_speed_mph.set_instantaneous_value(30)
+    A car passed at 48.0 KM/H
 
 Comparison with other libraries
 -------------------------------

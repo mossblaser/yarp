@@ -19,10 +19,10 @@ __names__ = [
 ]
 
 
+NoValue = sentinel.create("NoValue")
 """
 A special value indicating that a ``yarp`` value has not been assigned a value.
 """
-NoValue = sentinel.create("NoValue")
 
 class Value(object):
     """
@@ -41,14 +41,9 @@ class Value(object):
         A property holding the current continuous value held by this object. If
         not yet set, or if this object represents only instantaneous values,
         this will be ``NoValue``.
-        """
-        return self._value
-    
-    @value.setter
-    def value(self, new_value):
-        """
-        Sets the (continuous) contents of this value (raising the
-        on_value_changed callback afterwards).
+        
+        Setting this property sets the (continuous) contents of this value
+        (raising the :py:meth:`on_value_changed` callback afterwards).
         
         To set the instantaneous value, see :py:meth:`set_instantaneous_value`.
         
@@ -60,6 +55,10 @@ class Value(object):
         the passed variable explicitly. You must always be sure to call
         :py:meth:`set_instantaneous_value` after changing :py:attr:`_value`.
         """
+        return self._value
+    
+    @value.setter
+    def value(self, new_value):
         self._value = new_value
         self.set_instantaneous_value(new_value)
     
@@ -79,9 +78,9 @@ class Value(object):
         
         The callback function will be called with a single argument: the value
         now held by this object. If the value is continuous, the value given as
-        the argument will match the :py:attr:`ValueBase.value` property.
+        the argument will match the :py:attr:`Value.value` property.
         Otherwise, if this value is instantaneous, the value will not be
-        reflected in the :py:attr:`ValueBase.value` property.
+        reflected in the :py:attr:`Value.value` property.
         
         .. note::
         
@@ -103,7 +102,7 @@ class ListValue(Value):
         Params
         ------
         list_of_values: [:py:class:`Value`, ...]
-            A fixed list of :py:class:`Value`s. The :py:attr:`value` of this
+            A fixed list of :py:class:`Value`\ s. The :py:attr:`value` of this
             object will be an array of the underlying values. Callbacks will be
             raised whenever a value in the list changes.
             
@@ -114,7 +113,7 @@ class ListValue(Value):
             present in the version of this list passed to registered callbacks
             but otherwise not retained. (Typically the instantaneous values
             will be represented by :py:class:`NoValue` in :py:attr:`value` or
-            in callbacks resulting from other :py:class:`Value`s changing.
+            in callbacks resulting from other :py:class:`Value`\ s changing.
         """
         self._list_of_values = list_of_values
         lst = [v.value for v in self._list_of_values]
@@ -143,7 +142,7 @@ class TupleValue(Value):
         Params
         ------
         tuple_of_values: (:py:class:`Value`, ...)
-            A fixed tuple of :py:class:`Value`s. The :py:attr:`value` of this
+            A fixed tuple of :py:class:`Value`\ s. The :py:attr:`value` of this
             object will be a tuple of the underlying values. Callbacks will be
             raised whenever a value in the tuple changes.
             
@@ -154,7 +153,7 @@ class TupleValue(Value):
             present in the version of this tuple passed to registered callbacks
             but otherwise not retained. (Typically the instantaneous values
             will be represented by :py:class:`NoValue` in :py:attr:`value` or
-            in callbacks resulting from other :py:class:`Value`s changing.
+            in callbacks resulting from other :py:class:`Value`\ s changing.
         """
         self._tuple_of_values = list_of_values
         tup = tuple(v.value for v in self._tuple_of_values)
@@ -185,7 +184,7 @@ class DictValue(Value):
         Params
         ------
         dict_of_values: {key: :py:class:`Value`, ...}
-            A fixed dictionary of :py:class:`Value`s. The :py:attr:`value` of this
+            A fixed dictionary of :py:class:`Value`\ s. The :py:attr:`value` of this
             object will be a dictionary of the underlying values. Callbacks will be
             raised whenever a value in the dictionary changes.
             
@@ -197,7 +196,7 @@ class DictValue(Value):
             callbacks but otherwise not retained. (Typically the instantaneous
             values will be represented by :py:class:`NoValue` in
             :py:attr:`value` or in callbacks resulting from other
-            :py:class:`Value`s changing.
+            :py:class:`Value`\ s changing.
         """
         self._dict_of_values = dict_of_values
         dct = {k: v.value for k, v in self._dict_of_values.items()}
