@@ -85,6 +85,9 @@ numpydoc_show_class_members = False
 
 autodoc_default_flags = ["members"]
 
+# Don't test every code snippet, just .. doctest:: ones
+doctest_test_doctest_blocks = ""
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

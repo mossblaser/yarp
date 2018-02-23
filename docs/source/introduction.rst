@@ -1,3 +1,5 @@
+.. module:: yarp
+
 Introduction
 ============
 
@@ -71,6 +73,7 @@ for example an ephemeral sensor reading. For example:
     >>> def on_car_measured(speed_kph):
     ...     print("A car passed at {} KM/H".format(speed_kph))
     >>> car_speed_kph.on_value_changed(on_car_measured)
+    <function ...>
     
     >>> # Now lets instantaneously set the value as if a car has just gone past
     >>> # and watch as our callback is called with the speed in KM/H

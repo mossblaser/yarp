@@ -88,8 +88,12 @@ class Value(object):
             intentional restriction: if this causes you difficulties this is a
             good sign what you're doing is 'serious' enough that ``yarp`` is
             not for you.
+        
+        This function returns the callback passed to it making it possible to
+        use it as a decorator if desired.
         """
         self._on_value_changed.append(cb)
+        return cb
 
 class ListValue(Value):
     """
