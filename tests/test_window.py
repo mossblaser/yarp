@@ -81,14 +81,16 @@ class TestTimeWindow(object):
         return win
     
     @pytest.fixture
-    def remove_initial_win_value(self, win):
+    def remove_initial_win_value(self, win, dv, sem, log, event_loop):
         """
         A bodge to make tests quicker: Removes the initial value from the window
-        by directly poking its internal state.
+        by zeroing out the timer temporarily.
         """
-        win._value = []
-        win._timers[0][1].cancel()
-        win._timers = []
+        old_dv = dv.value
+        dv.value = 0
+        dv.value = old_dv
+        log.clear()
+        event_loop.run_until_complete(sem.acquire())
     
     
     @pytest.mark.asyncio

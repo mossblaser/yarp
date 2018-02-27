@@ -10,9 +10,9 @@ import sentinel
 __names__ = [
     "NoValue",
     "Value",
-    "ListValue",
-    "TupleValue",
-    "DictValue",
+    "value_list",
+    "value_tuple",
+    "value_dict",
     "ensure_value",
     "make_instantaneous",
     "make_persistent",
@@ -95,127 +95,119 @@ class Value(object):
         self._on_value_changed.append(cb)
         return cb
 
-class ListValue(Value):
+def value_list(list_of_values):
     """
-    A :py:class:`Value` consisting of a fixed list of other :py:class:`Values
-    <Value>`.
-    """
+    Returns a :py:class:`Value` consisting of a fixed list of other
+    :py:class:`Values <Value>`. The returned :py:class:`Value` will change
+    whenever one of its members does.
     
-    def __init__(self, list_of_values):
-        """
-        Params
-        ------
-        list_of_values: [:py:class:`Value`, ...]
-            A fixed list of :py:class:`Value`\ s. The :py:attr:`value` of this
-            object will be an array of the underlying values. Callbacks will be
-            raised whenever a value in the list changes.
-            
-            It is not possible to modify the list or set the contained values
-            directly from this object.
-            
-            For instantaneous list members, the instantaneous value will be
-            present in the version of this list passed to registered callbacks
-            but otherwise not retained. (Typically the instantaneous values
-            will be represented by :py:class:`NoValue` in :py:attr:`value` or
-            in callbacks resulting from other :py:class:`Value`\ s changing.
-        """
-        self._list_of_values = list_of_values
-        lst = [v.value for v in self._list_of_values]
-        super(ListValue, self).__init__(lst)
+    Params
+    ------
+    list_of_values: [:py:class:`Value`, ...]
+        A fixed list of :py:class:`Value`\ s. The :py:attr:`value` of this
+        object will be an array of the underlying values. Callbacks will be
+        raised whenever a value in the list changes.
         
-        for i, value in enumerate(self._list_of_values):
-            value.on_value_changed(functools.partial(self._element_changed, i))
+        It is not possible to modify the list or set the contained values
+        directly from this object.
+        
+        For instantaneous list members, the instantaneous value will be
+        present in the version of this list passed to registered callbacks
+        but otherwise not retained. (Typically the instantaneous values
+        will be represented by :py:class:`NoValue` in :py:attr:`value` or
+        in callbacks resulting from other :py:class:`Value`\ s changing.
+    """
+    output_value = Value([v.value for v in list_of_values])
     
-    def _element_changed(self, index, new_value):
-        self._value[index] = self._list_of_values[index].value
+    def element_changed(index, new_value):
+        output_value._value[index] = list_of_values[index].value
         
         # Substitute in the instantaneous value of the changed element
-        instantaneous_value = self._value.copy()
+        instantaneous_value = output_value.value.copy()
         instantaneous_value[index] = new_value
         
-        self.set_instantaneous_value(instantaneous_value)
+        output_value.set_instantaneous_value(instantaneous_value)
+    
+    for i, value in enumerate(list_of_values):
+        value.on_value_changed(functools.partial(element_changed, i))
+    
+    return output_value
 
-class TupleValue(Value):
+def value_tuple(tuple_of_values):
     """
     A :py:class:`Value` consisting of a tuple of other :py:class:`Values
     <Value>`.
-    """
     
-    def __init__(self, list_of_values):
-        """
-        Params
-        ------
-        tuple_of_values: (:py:class:`Value`, ...)
-            A fixed tuple of :py:class:`Value`\ s. The :py:attr:`value` of this
-            object will be a tuple of the underlying values. Callbacks will be
-            raised whenever a value in the tuple changes.
-            
-            It is not possible to modify the tuple or set the contained values
-            directly from this object.
-            
-            For instantaneous tuple members, the instantaneous value will be
-            present in the version of this tuple passed to registered callbacks
-            but otherwise not retained. (Typically the instantaneous values
-            will be represented by :py:class:`NoValue` in :py:attr:`value` or
-            in callbacks resulting from other :py:class:`Value`\ s changing.
-        """
-        self._tuple_of_values = list_of_values
-        tup = tuple(v.value for v in self._tuple_of_values)
-        super(TupleValue, self).__init__(tup)
+    Params
+    ------
+    tuple_of_values: (:py:class:`Value`, ...)
+        A fixed tuple of :py:class:`Value`\ s. The :py:attr:`value` of this
+        object will be a tuple of the underlying values. Callbacks will be
+        raised whenever a value in the tuple changes.
         
-        for i, value in enumerate(self._tuple_of_values):
-            value.on_value_changed(functools.partial(self._element_changed, i))
+        It is not possible to modify the tuple or set the contained values
+        directly from this object.
+        
+        For instantaneous tuple members, the instantaneous value will be
+        present in the version of this tuple passed to registered callbacks
+        but otherwise not retained. (Typically the instantaneous values
+        will be represented by :py:class:`NoValue` in :py:attr:`value` or
+        in callbacks resulting from other :py:class:`Value`\ s changing.
+    """
+    output_value = Value(tuple(v.value for v in tuple_of_values))
     
-    def _element_changed(self, index, new_value):
-        self._value = tuple(v.value for v in self._tuple_of_values)
+    def element_changed(index, new_value):
+        output_value._value = tuple(v.value for v in tuple_of_values)
         
         # Substitute in the instantaneous value of the changed element
         instantaneous_value = tuple(
             v.value if i != index else new_value
-            for i, v in enumerate(self._tuple_of_values)
+            for i, v in enumerate(tuple_of_values)
         )
         
-        self.set_instantaneous_value(instantaneous_value)
+        output_value.set_instantaneous_value(instantaneous_value)
+    
+    for i, value in enumerate(tuple_of_values):
+        value.on_value_changed(functools.partial(element_changed, i))
+    
+    return output_value
 
-class DictValue(Value):
+def value_dict(dict_of_values):
     """
     A :py:class:`Value` consisting of a dictionary where the values (but not
     keys) are  :py:class:`Values <Value>`.
-    """
-   
-    def __init__(self, dict_of_values):
-        """
-        Params
-        ------
-        dict_of_values: {key: :py:class:`Value`, ...}
-            A fixed dictionary of :py:class:`Value`\ s. The :py:attr:`value` of this
-            object will be a dictionary of the underlying values. Callbacks will be
-            raised whenever a value in the dictionary changes.
-            
-            It is not possible to modify the set of keys in the dictionary nor
-            directly change the values of its elements from this object.
-            
-            For instantaneous dictionary members, the instantaneous value will
-            be present in the version of this dict passed to registered
-            callbacks but otherwise not retained. (Typically the instantaneous
-            values will be represented by :py:class:`NoValue` in
-            :py:attr:`value` or in callbacks resulting from other
-            :py:class:`Value`\ s changing.
-        """
-        self._dict_of_values = dict_of_values
-        dct = {k: v.value for k, v in self._dict_of_values.items()}
-        super(DictValue, self).__init__(dct)
-        
-        for key, value in self._dict_of_values.items():
-            value.on_value_changed(functools.partial(self._element_changed, key))
     
-    def _element_changed(self, key, new_value):
-        self._value[key] = self._dict_of_values[key].value
+    Params
+    ------
+    dict_of_values: {key: :py:class:`Value`, ...}
+        A fixed dictionary of :py:class:`Value`\ s. The :py:attr:`value` of this
+        object will be a dictionary of the underlying values. Callbacks will be
+        raised whenever a value in the dictionary changes.
         
-        instantaneous_value = self._value.copy()
+        It is not possible to modify the set of keys in the dictionary nor
+        directly change the values of its elements from this object.
+        
+        For instantaneous dictionary members, the instantaneous value will
+        be present in the version of this dict passed to registered
+        callbacks but otherwise not retained. (Typically the instantaneous
+        values will be represented by :py:class:`NoValue` in
+        :py:attr:`value` or in callbacks resulting from other
+        :py:class:`Value`\ s changing.
+    """
+    output_value = Value({k: v.value for k, v in dict_of_values.items()})
+    
+    def element_changed(key, new_value):
+        output_value._value[key] = dict_of_values[key].value
+        
+        instantaneous_value = output_value.value.copy()
         instantaneous_value[key] = new_value
         
-        self.set_instantaneous_value(instantaneous_value)
+        output_value.set_instantaneous_value(instantaneous_value)
+    
+    for key, value in dict_of_values.items():
+        value.on_value_changed(functools.partial(element_changed, key))
+    
+    return output_value
 
 def ensure_value(value):
     """Ensure a variable is a :py:class:`Value` object, wrapping it accordingly
@@ -223,43 +215,43 @@ def ensure_value(value):
     
     * If already a :py:class:`Value`, returns unmodified.
     * If a list, tuple or dict, applies :py:func:`ensure_value` to all contained values and
-      returns a :py:class:`ListValue`, :py:class:`TupleValue` or
-      :py:class:`DictValue` respectively.
+      returns a :py:class:`value_list`, :py:class:`value_tuple` or
+      :py:class:`value_dict` respectively.
     * If any other type, wraps the variable in a continous :py:class:`Value`
       with the initial value set to the defined value.
     """
     if isinstance(value, Value):
         return value
     elif isinstance(value, list):
-        return ListValue([ensure_value(v) for v in value])
+        return value_list([ensure_value(v) for v in value])
     elif isinstance(value, tuple):
-        return TupleValue(tuple(ensure_value(v) for v in value))
+        return value_tuple(tuple(ensure_value(v) for v in value))
     elif isinstance(value, dict):
-        return DictValue({k: ensure_value(v) for k, v in value.items()})
+        return value_dict({k: ensure_value(v) for k, v in value.items()})
     else:
         return Value(value)
 
-class make_instantaneous(Value):
+def make_instantaneous(source_value):
     """
     Make a persistent :py:class`Value` into an instantaneous one which 'fires'
     whenever the persistant value is changed.
     """
-    
-    def __init__(self, source_value):
-        super(make_instantaneous, self).__init__()
-        ensure_value(source_value).on_value_changed(self.set_instantaneous_value)
+    output_value = Value()
+    ensure_value(source_value).on_value_changed(output_value.set_instantaneous_value)
+    return output_value
 
-class make_persistent(Value):
+def make_persistent(source_value, initial_value=NoValue):
     """
     Make an instantaneous :py:class:`Value` into a persistant one, keeping the old value
     between changes. Initially sets the :py:class:`Value` to ``initial_value``.
     """
     
-    def __init__(self, source_value, initial_value=NoValue):
-        source_value = ensure_value(source_value)
-        super(make_persistent, self).__init__(initial_value)
-        source_value.on_value_changed(self._on_source_value_changed)
+    output_value = Value(initial_value)
+    source_value = ensure_value(source_value)
     
-    def _on_source_value_changed(self, new_value):
-        self.value = new_value
+    @source_value.on_value_changed
+    def on_source_value_changed(new_value):
+        output_value.value = new_value
+    
+    return output_value
 

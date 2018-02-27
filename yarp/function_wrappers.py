@@ -12,94 +12,68 @@ __names__ = [
     "instantaneous_fn",
 ]
 
-class _FnReturnValueBase(Value):
+def _function_call_on_argument_value_change(call_immediately, callback,
+                                            *value_args, **value_kwargs):
     """
-    Internal use. Base class for a Value representing the return value of a function.
+    Internal use. Call a regular Python function whenever a :py:class:`Value`
+    in the arguments change.
+    
+    Parameters
+    ----------
+    call_immediately: bool
+        If True, calls 'callback' immediately with the current value of the
+        argument :py:class:`Values`.
+    callback: callable
+        Call this function with value-substituted arguments whenever an
+        argument value changes.
+    *value_args, **value_kwargs
+        The arguments given to this function. These may contain
+        :py:class:`Value` objects. When these values change, ``callback`` will
+        be called with the latest underlying values from the arguments.
     """
+    args = []
+    kwargs = {}
     
-    def __init__(self, fn, *args, **kwargs):
-        """
-        Parameters
-        ----------
-        fn: callable
-            The function whose return value this Value represents.
-        *args, **kwargs
-            The arguments given to this function. These may contain
-            :py:class:`Value` objects. When these values change, ``fn`` will be
-            reevaluated and this :py:class:`Value` set to the new returned
-            value accordingly.
-            
-            Inheritors should implement :py:meth:`_call_fn` which should call
-            ``fn`` and set this value in whatever way is most appropraite (e.g.
-            instantaneously or continuously).
-        """
-        super(_FnReturnValueBase, self).__init__()
-        
-        self._fn = fn
-        
-        # Wrap all args/kwargs in Value objects, if not already, and subscribe
-        # to changes
-        self._args = []
-        for i, arg in enumerate(map(ensure_value, args)):
-            self._args.append(arg)
-            arg.on_value_changed(functools.partial(self._on_arg_changed, i))
-        
-        self._kwargs = {}
-        for key, arg in kwargs.items():
-            arg = ensure_value(arg)
-            self._kwargs[key] = arg
-            arg.on_value_changed(functools.partial(self._on_kwarg_changed, key))
-    
-    def _get_args_kwargs(self):
+    def get_args_kwargs():
         """
         Return an (args, kwargs) tuple containing the current underlying values
         of the arg/kwarg :py:class:`Value` objects.
         """
-        args = [a.value for a in self._args]
-        kwargs = {k: a.value for k, a in self._kwargs.items()}
+        a = [a.value for a in args]
+        k = {k: a.value for k, a in kwargs.items()}
         
-        return (args, kwargs)
+        return (a, k)
     
-    def _on_arg_changed(self, index, value):
+    def on_arg_changed(index, value):
         """Callback on an argument :py:class:`Value` changing."""
-        args, kwargs = self._get_args_kwargs()
+        args, kwargs = get_args_kwargs()
         args[index] = value
         
-        self._call_fn(*args, **kwargs)
+        callback(*args, **kwargs)
     
-    def _on_kwarg_changed(self, key, value):
+    def on_kwarg_changed(key, value):
         """Callback on a keyword argument :py:class:`Value` changing."""
-        args, kwargs = self._get_args_kwargs()
+        args, kwargs = get_args_kwargs()
         kwargs[key] = value
         
-        self._call_fn(*args, **kwargs)
+        callback(*args, **kwargs)
+    
+    # Wrap all args/kwargs in Value objects, if not already, and subscribe
+    # to changes
+    for i, arg in enumerate(map(ensure_value, value_args)):
+        args.append(arg)
+        arg.on_value_changed(functools.partial(on_arg_changed, i))
+    
+    for key, arg in value_kwargs.items():
+        arg = ensure_value(arg)
+        kwargs[key] = arg
+        arg.on_value_changed(functools.partial(on_kwarg_changed, key))
+    
+    if call_immediately:
+        a, k = get_args_kwargs()
+        callback(*a, **k)
+    
 
-
-class _PersistentFnReturnValue(_FnReturnValueBase):
-    """
-    Internal use. A persistent Value representing the return value of a function.
-    """
-    
-    def __init__(self, fn, *args, **kwargs):
-        super(_PersistentFnReturnValue, self).__init__(fn, *args, **kwargs)
-        
-        # Populate initial value
-        args, kwargs = self._get_args_kwargs()
-        self._value = self._fn(*args, **kwargs)
-    
-    def _call_fn(self, *args, **kwargs):
-        self.value = self._fn(*args, **kwargs)
-
-class _InstantaneousFnReturnValue(_FnReturnValueBase):
-    """
-    Internal use. A instantaneous Value representing the return value of a function.
-    """
-    
-    def __init__(self, fn, *args, **kwargs):
-        super(_InstantaneousFnReturnValue, self).__init__(fn, *args, **kwargs)
-    
-    def _call_fn(self, *args, **kwargs):
-        self.set_instantaneous_value(self._fn(*args, **kwargs))
 
 def fn(f):
     """
@@ -138,7 +112,19 @@ def fn(f):
     """
     @functools.wraps(f)
     def instance_maker(*args, **kwargs):
-        return _PersistentFnReturnValue(f, *args, **kwargs)
+        output_value = Value()
+        first_call = True
+        def callback(*args, **kwargs):
+            nonlocal first_call
+            if first_call:
+                first_call = False
+                output_value._value = f(*args, **kwargs)
+            else:
+                output_value.value = f(*args, **kwargs)
+        
+        _function_call_on_argument_value_change(
+            True, callback, *args, **kwargs)
+        return output_value
     
     return instance_maker
 
@@ -152,7 +138,12 @@ def instantaneous_fn(f):
     """
     @functools.wraps(f)
     def instance_maker(*args, **kwargs):
-        return _InstantaneousFnReturnValue(f, *args, **kwargs)
+        output_value = Value()
+        def callback(*args, **kwargs):
+            output_value.set_instantaneous_value(f(*args, **kwargs))
+        
+        _function_call_on_argument_value_change(
+            False, callback, *args, **kwargs)
+        return output_value
     
     return instance_maker
-

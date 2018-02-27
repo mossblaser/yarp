@@ -1,7 +1,7 @@
 from mock import Mock
 
 from yarp import \
-    NoValue, Value, ListValue, TupleValue, DictValue, ensure_value, \
+    NoValue, Value, value_list, value_tuple, value_dict, ensure_value, \
     make_persistent, make_instantaneous
 
 
@@ -33,12 +33,12 @@ def test_change_callback_only():
     assert v.value is NoValue
 
 
-def test_list_value_persistent():
+def test_value_list_persistent():
     a = Value("a")
     b = Value("b")
     c = Value("c")
     
-    lst = ListValue([a, b, c])
+    lst = value_list([a, b, c])
     
     # Initial value should have passed through
     assert lst.value == ["a", "b", "c"]
@@ -62,13 +62,13 @@ def test_list_value_persistent():
     m.assert_called_once_with(["A", "B", "C"])
 
 
-def test_list_value_instantaneous():
+def test_value_list_instantaneous():
     # A mix of instantaneous and continuous
     a = Value("a")
     b = Value()
     c = Value()
     
-    lst = ListValue([a, b, c])
+    lst = value_list([a, b, c])
     
     # Initial value should have passed through
     assert lst.value == ["a", NoValue, NoValue]
@@ -93,12 +93,12 @@ def test_list_value_instantaneous():
     m.assert_called_once_with(["A", NoValue, "c"])
 
 
-def test_tuple_value_persistent():
+def test_value_tuple_persistent():
     a = Value("a")
     b = Value("b")
     c = Value("c")
     
-    tup = TupleValue((a, b, c))
+    tup = value_tuple((a, b, c))
     
     # Initial value should have passed through
     assert tup.value == ("a", "b", "c")
@@ -122,13 +122,13 @@ def test_tuple_value_persistent():
     m.assert_called_once_with(("A", "B", "C"))
 
 
-def test_tuple_value_instantaneous():
+def test_value_tuple_instantaneous():
     # A mix of instantaneous and continuous
     a = Value("a")
     b = Value()
     c = Value()
     
-    tup = TupleValue([a, b, c])
+    tup = value_tuple([a, b, c])
     
     # Initial value should have passed through
     assert tup.value == ("a", NoValue, NoValue)
@@ -153,12 +153,12 @@ def test_tuple_value_instantaneous():
     m.assert_called_once_with(("A", NoValue, "c"))
 
 
-def test_dict_value_persistent():
+def test_value_dict_persistent():
     a = Value("a")
     b = Value("b")
     c = Value("c")
     
-    dct = DictValue({"a": a, "b": b, "c": c})
+    dct = value_dict({"a": a, "b": b, "c": c})
     
     # Initial value should have passed through
     assert dct.value == {"a": "a", "b": "b", "c": "c"}
@@ -182,13 +182,13 @@ def test_dict_value_persistent():
     m.assert_called_once_with({"a": "A", "b": "B", "c": "C"})
 
 
-def test_dict_value_instantaneous():
+def test_value_dict_instantaneous():
     # A mix of instantaneous and continuous
     a = Value("a")
     b = Value()
     c = Value()
     
-    dct = DictValue({"a": a, "b": b, "c": c})
+    dct = value_dict({"a": a, "b": b, "c": c})
     
     # Initial value should have passed through
     assert dct.value == {"a": "a", "b": NoValue, "c": NoValue}

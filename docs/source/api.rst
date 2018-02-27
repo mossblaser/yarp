@@ -13,19 +13,18 @@ defined below.
 
 .. autoclass:: Value
 
-Aggregate Value types
----------------------
+Aggregate Values
+----------------
 
-The ``yarp`` API provides a limited set of convenience wrappers around
-:py:class:`Value` which turn certain native Python data structures into
-:py:class:`Value`\ s which update whenever the underlying :py:class:`Value`\ s
-do.
+The ``yarp`` API provides a limited set of convenience functions which which
+turn certain native Python data structures into :py:class:`Value`\ s which
+update whenever the underlying :py:class:`Value`\ s do.
 
-.. autoclass:: ListValue
+.. autofunction:: value_list
 
-.. autoclass:: TupleValue
+.. autofunction:: value_tuple
 
-.. autoclass:: DictValue
+.. autofunction:: value_dict
 
 Value casting
 -------------

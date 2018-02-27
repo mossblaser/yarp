@@ -3,6 +3,7 @@ import pytest
 from mock import Mock
 
 from yarp import NoValue, Value, filter
+from yarp.general import _check_value
 
 @pytest.mark.parametrize("rule,pass_values,block_values", [
     (NoValue, [0, 123, True, False, None], [NoValue]),
@@ -12,13 +13,10 @@ from yarp import NoValue, Value, filter
 ])
 def test_check_value(rule, pass_values, block_values):
     # Test the internal rule-checking implementation
-    v = Value(123)
-    fv = filter(v, rule)
-    
     for value in pass_values:
-        assert fv._check_value(value) is True
+        assert _check_value(value, rule) is True
     for value in block_values:
-        assert fv._check_value(value) is False
+        assert _check_value(value, rule) is False
 
 
 def test_check_initial_value():

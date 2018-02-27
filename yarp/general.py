@@ -11,7 +11,7 @@ __names__ = [
 ]
 
 
-class window(Value):
+def window(source_value, num_values):
     """Produce a moving window over a :py:class:`Value`'s historical values.
     
     This function treats the Value it is passed as a persistent Value, even if
@@ -24,51 +24,73 @@ class window(Value):
     increaesd, any previously dropped values will not return.  ``num_values``
     is always assumed to be an integer greater than zero and never ``NoValue``.
     """
+    source_value = ensure_value(source_value)
+    output_value = Value([source_value.value])
     
-    def __init__(self, source_value, num_values):
-        source_value = ensure_value(source_value)
-        super(window, self).__init__([source_value.value])
-        
-        self._num_values = ensure_value(num_values)
-        assert self._num_values.value >= 1
-        
-        source_value.on_value_changed(self._on_source_value_changed)
-        self._num_values.on_value_changed(self._on_num_values_changed)
-        
+    num_values = ensure_value(num_values)
+    assert num_values.value >= 1
     
-    def _on_source_value_changed(self, new_value):
+    @source_value.on_value_changed
+    def on_source_value_changed(new_value):
         """Internal. Insert incoming Value into the window."""
-        self.value = (self.value + [new_value])[-self._num_values.value:]
+        output_value.value = (output_value.value + [new_value])[-num_values.value:]
     
-    def _on_num_values_changed(self, _instantaneous_new_num_values):
+    @num_values.on_value_changed
+    def on_num_values_changed(_instantaneous_new_num_values):
         """Internal. Handle window size changes."""
         # Truncate the window data if required
-        new_num_values = self._num_values.value
+        new_num_values = num_values.value
         assert new_num_values >= 1
-        if len(self.value) > new_num_values:
-            self.value = self.value[-new_num_values:]
+        if len(output_value.value) > new_num_values:
+            output_value.value = output_value.value[-new_num_values:]
+    
+    return output_value
 
-class no_repeat(Value):
+def no_repeat(source_value):
     """
     Don't pass on change callbacks if the :py:class:`Value` hasn't changed.
     
     Works for both continuous and instantaneous :py:class:`Value`\ s.
     """
-    
-    def __init__(self, source_value):
-        self._source_value = ensure_value(source_value)
-        super(no_repeat, self).__init__(self._source_value.value)
-        self._last_value = self.value
-        
-        self._source_value.on_value_changed(self._on_source_value_changed)
-    
-    def _on_source_value_changed(self, new_value):
-        if new_value != self._last_value:
-            self._last_value = new_value
-            self._value = self._source_value.value
-            self.set_instantaneous_value(new_value)
+    source_value = ensure_value(source_value)
+    last_value = source_value.value
 
-class filter(Value):
+    # Initially take on the source value
+    output_value = Value(last_value)
+    
+    @source_value.on_value_changed
+    def on_source_value_changed(new_value):
+        nonlocal last_value
+        if new_value != last_value:
+            last_value = new_value
+            # Copy to output whether continuous or instantaneous
+            output_value._value = source_value.value
+            output_value.set_instantaneous_value(new_value)
+    
+    return output_value
+
+
+def _check_value(value, rule):
+    """Internal. Test a value, return whether it should be retained or
+    not according to the provided rule.
+    
+    If the rule is NoValue, returns True for non-NoValue values, including None
+    or falsey values.
+    
+    If the rule is None, returns True for non-NoValue values which are truthy.
+    
+    If the rule is a function, calls it with the value and expects a boolean to
+    be returned.
+    """
+    if rule is NoValue:
+        return value is not NoValue
+    elif rule is None:
+        return value is not NoValue and bool(value)
+    else:
+        return rule(value)
+
+
+def filter(source_value, rule=NoValue):
     """Filter change events.
     
     The filter rule should be a function which takes the new value as an
@@ -82,29 +104,17 @@ class filter(Value):
     filtered out. If the filter rule is ``NoValue`` (the default) only
     ``NoValue`` will be filtered out.
     """
+    source_value = ensure_value(source_value)
+    output_value = Value(
+        source_value.value
+        if (source_value.value is not NoValue and
+            _check_value(source_value.value, rule))
+        else NoValue)
     
-    def __init__(self, source_value, rule=NoValue):
-        self._source_value = ensure_value(source_value)
-        self._rule = rule
-        super(filter, self).__init__(
-            self._source_value.value
-            if (self._source_value.value is not NoValue and
-                self._check_value(self._source_value.value))
-            else NoValue)
-        
-        self._source_value.on_value_changed(self._on_source_value_changed)
+    @source_value.on_value_changed
+    def on_source_value_changed(new_value):
+        if _check_value(new_value, rule):
+            output_value._value = source_value.value
+            output_value.set_instantaneous_value(new_value)
     
-    def _check_value(self, value):
-        """Internal. Test a value, return whether it should be retained or
-        not."""
-        if self._rule is NoValue:
-            return value is not NoValue
-        elif self._rule is None:
-            return value is not NoValue and bool(value)
-        else:
-            return self._rule(value)
-    
-    def _on_source_value_changed(self, new_value):
-        if self._check_value(new_value):
-            self._value = self._source_value.value
-            self.set_instantaneous_value(new_value)
+    return output_value
