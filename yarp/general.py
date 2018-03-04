@@ -2,12 +2,13 @@
 General purpose utility functions for manipulating :py:class:`Value` values.
 """
 
-from yarp import NoValue, Value, ensure_value
+from yarp import NoValue, Value, fn, ensure_value
 
 __names__ = [
     "window",
     "no_repeat",
     "filter",
+    "replace_novalue",
 ]
 
 
@@ -118,3 +119,29 @@ def filter(source_value, rule=NoValue):
             output_value.set_instantaneous_value(new_value)
     
     return output_value
+
+
+@fn
+def replace_novalue(source_value, replacement_if_novalue=None):
+    """
+    If the ``source_value`` is :py:data:`NoValue`, return
+    ``replacement_if_novalue`` instead.
+    
+    Parameters
+    ----------
+    source_value : :py:class:`Value`
+        An instantaneous or continuous :py:class:`Value`.
+    replacement_if_novalue : Python object or :py:class:`Value`
+        Replacement value to use if ``source_value`` has the value
+        :py:data:`NoValue`.
+    
+    Returns
+    -------
+    A continuous :py:class:`Value` which will be a copy of ``source_value`` if
+    ``source_value`` is not :py:data:`NoValue`, otherwise the value of
+    ``replacement_if_novalue`` is used instead.
+    """
+    if source_value is NoValue:
+        return replacement_if_novalue
+    else:
+        return source_value

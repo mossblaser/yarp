@@ -2,7 +2,7 @@ import pytest
 
 from mock import Mock
 
-from yarp import NoValue, Value, filter
+from yarp import NoValue, Value, filter, replace_novalue
 from yarp.general import _check_value
 
 @pytest.mark.parametrize("rule,pass_values,block_values", [
@@ -79,3 +79,22 @@ def test_change_instantaneous():
     assert fl.value is NoValue
     m.assert_called_once_with(2)
 
+
+def test_replace_novalue():
+    a = Value()
+    replacement = Value(123)
+    ar = replace_novalue(a, replacement)
+    
+    assert ar.value == 123
+    
+    a.value = "hi"
+    assert ar.value == "hi"
+    
+    a.value = NoValue
+    assert ar.value == 123
+    
+    replacement.value = 321
+    assert ar.value == 321
+    
+    a.value = "bye"
+    assert ar.value == "bye"

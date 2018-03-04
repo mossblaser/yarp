@@ -29,7 +29,15 @@ class Value(object):
     A continuous or instantaneous value which can be read and set.
     
     This base class defines the fundamental type in ``yarp``: the 'value'.
+    
+    The actual data contained by this object should be regarded as immutable
+    with changes being made by replacing the Python object with a new one to
+    affect changes.
     """
+    
+    # Note to developers: The magic methods (e.g. __add__) are monkey-patched
+    # into this class in the yarp.python_operators module. This is a little bit
+    # ugly but makes implementation substantially easier.
     
     def __init__(self, initial_value = NoValue):
         self._value = initial_value
@@ -101,8 +109,8 @@ def value_list(list_of_values):
     :py:class:`Values <Value>`. The returned :py:class:`Value` will change
     whenever one of its members does.
     
-    Params
-    ------
+    Parameters
+    ----------
     list_of_values: [:py:class:`Value`, ...]
         A fixed list of :py:class:`Value`\ s. The :py:attr:`value` of this
         object will be an array of the underlying values. Callbacks will be
@@ -138,8 +146,8 @@ def value_tuple(tuple_of_values):
     A :py:class:`Value` consisting of a tuple of other :py:class:`Values
     <Value>`.
     
-    Params
-    ------
+    Parameters
+    ----------
     tuple_of_values: (:py:class:`Value`, ...)
         A fixed tuple of :py:class:`Value`\ s. The :py:attr:`value` of this
         object will be a tuple of the underlying values. Callbacks will be
@@ -177,8 +185,8 @@ def value_dict(dict_of_values):
     A :py:class:`Value` consisting of a dictionary where the values (but not
     keys) are  :py:class:`Values <Value>`.
     
-    Params
-    ------
+    Parameters
+    ----------
     dict_of_values: {key: :py:class:`Value`, ...}
         A fixed dictionary of :py:class:`Value`\ s. The :py:attr:`value` of this
         object will be a dictionary of the underlying values. Callbacks will be
@@ -254,4 +262,3 @@ def make_persistent(source_value, initial_value=NoValue):
         output_value.value = new_value
     
     return output_value
-
