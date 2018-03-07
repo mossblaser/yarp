@@ -117,3 +117,9 @@ function whenever a marked variable changes. Refer to the original Meteor
 'tracker' implementation for a good description of how all this works.
 Unfortunately `metapensiero.reactive` only supports continuous values while
 `yarp` supports both continuous and persistent values.
+
+Documentation
+-------------
+
+Documentation for `yarp` can be found on
+[ReadTheDocs](http://yarp.readthedocs.io/).
