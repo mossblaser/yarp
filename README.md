@@ -1,7 +1,7 @@
 `yarp`: Yet Another Reactive(-ish) Programming library for Python
 =================================================================
 
-**A work in progress.**
+[![Build Status](https://travis-ci.org/mossblaser/yarp.svg?branch=master)](https://travis-ci.org/mossblaser/yarp)
 
 This library facilitates a programming style which is a little bit like
 [(functional-ish) reactive
