@@ -121,6 +121,7 @@ Python builtins and functions from the standard library:
     * ``oct(a)``
     * ``hex(a)``
     * ``zip(a)``
+    * ``len(a)``
 * Most non-mutating, non-underscore prefixed functions from the
   :py:mod:`operator` module.
 

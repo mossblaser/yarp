@@ -66,6 +66,7 @@ wrapped_functions = [
     ("oct", oct, "oct"),
     ("hex", hex, "hex"),
     ("zip", zip, "zip"),
+    ("len", len, "len"),
 ] + [
     (name, getattr(operator, name), "operator.{}".format(name))
     for name in wrapped_operator_functions
