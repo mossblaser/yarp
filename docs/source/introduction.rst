@@ -9,8 +9,8 @@ cells which compute new values based on the values in other cells. The neat
 feature of spreadsheets is that if you change the value in a cell, any other
 cell whose value depends on it is automatically recomputed.
 
-Using ``yarp`` you can define :py:class:`Values`, and functions acting on those
-values, which are automatically reevaluated when changed. For example:
+Using ``yarp`` you can define :py:class:`Value`\ s, and functions acting on
+those values, which are automatically reevaluated when changed. For example:
 
 .. doctest::
 
