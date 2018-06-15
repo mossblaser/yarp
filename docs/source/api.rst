@@ -167,3 +167,11 @@ The following utility functions are defined which accept and return
 .. autofunction:: time_window
 
 .. autofunction:: rate_limit
+
+File-backed Values
+------------------
+
+The following function can be used to make *very* persistent
+:py:class:`Value`\ s
+
+.. autofunction:: file_backed_value

@@ -11,3 +11,4 @@ from yarp.function_wrappers import *
 from yarp.general import *
 from yarp.temporal import *
 from yarp.python_operators import *
+from yarp.file import *
