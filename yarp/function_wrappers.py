@@ -105,7 +105,7 @@ def fn(f):
     the function are automatically passed through without modification).
     
     The wrapped function is called once immediately when it is called and then
-    again is required when its arguments change. The output :py:class:`Value`
+    again as required when its arguments change. The output :py:class:`Value`
     will be persistent.
     
     See also: :py:func:`instantaneous_fn`.

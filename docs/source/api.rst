@@ -110,6 +110,8 @@ Python builtins and functions from the standard library:
 
 * Builtins
     * ``bool(a)``
+    * ``any(a)``
+    * ``all(a)``
     * ``min(a)``
     * ``max(a)``
     * ``sum(a)``

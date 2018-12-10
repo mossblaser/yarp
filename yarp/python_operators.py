@@ -53,6 +53,8 @@ wrapped_operator_functions = [
 # Array of (name, function, native name, e.g. operator.add) tuples.
 wrapped_functions = [
     ("bool", bool, "bool"),
+    ("any", any, "any"),
+    ("all", all, "all"),
     ("min", min, "min"),
     ("max", max, "max"),
     ("sum", sum, "sum"),
