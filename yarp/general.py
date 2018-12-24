@@ -48,7 +48,7 @@ def window(source_value, num_values):
     return output_value
 
 def no_repeat(source_value):
-    """
+    r"""
     Don't pass on change callbacks if the :py:class:`Value` hasn't changed.
     
     Works for both continuous and instantaneous :py:class:`Value`\ s.

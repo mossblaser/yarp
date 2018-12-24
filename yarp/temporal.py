@@ -13,7 +13,7 @@ __names__ = [
 ]
 
 def delay(source_value, delay_seconds, loop=None):
-    """
+    r"""
     Produce a time-delayed version of a :py:class:`Value`.
     
     Supports both instantaneous and continous :py:class:`Values`. For
