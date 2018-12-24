@@ -7,6 +7,7 @@ from functools import wraps
 from yarp.function_wrappers import Value, fn, instantaneous_fn
 
 import operator
+import builtins
 
 # Functions from the operator module to wrap.
 wrapped_operator_functions = [
@@ -69,8 +70,9 @@ wrapped_functions = [
     ("hex", hex, "hex"),
     ("zip", zip, "zip"),
     ("len", len, "len"),
+    ("getattr", getattr, "getattr"),
 ] + [
-    (name, getattr(operator, name), "operator.{}".format(name))
+    (name, builtins.getattr(operator, name), "operator.{}".format(name))
     for name in wrapped_operator_functions
 ]
 
@@ -99,6 +101,11 @@ def swap_args(f):
     def wrapper(*args):
         return f(*reversed(args))
     return wrapper
+
+
+def call(f, *args, **kwargs):
+    """Call ``f`` with the arguments provided, passing on the return value."""
+    return f(*args, **kwargs)
 
 value_operators = [
     # Arithmatic
@@ -150,6 +157,10 @@ value_operators = [
     ("__int__", int, "int(a)"),
     ("__float__", float, "float(a)"),
     ("__round__", round, "round(a)"),
+    # Access Value attributes
+    ("__getattr__", builtins.getattr, "a.name"),
+    # Execute a value as a function
+    ("__call__", call, "a(...)"),
 ]
 for function_name, native_function, doc in value_operators:
     continous = fn(native_function)
@@ -157,6 +168,7 @@ for function_name, native_function, doc in value_operators:
     
     # Add to Value class as operator implementations
     setattr(Value, function_name, continous)
+
 
 __names__ = (
     [name for name, _, _ in wrapped_functions] +

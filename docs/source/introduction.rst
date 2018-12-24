@@ -45,6 +45,31 @@ those values, which are automatically reevaluated when changed. For example:
     >>> b.value = 10
     >>> a_plus_b.value
     15
+    
+    >>> # Accessing attributes of a Value returns a Value-wrapped version of
+    >>> # that attribute, e.g.
+    >>> c = Value(complex(1, 2))
+    >>> r = c.real
+    >>> r.value
+    1
+    >>> i = c.imag
+    >>> i.value
+    2
+    >>> c.value = complex(10, 100)
+    >>> r.value
+    10
+    >>> i.value
+    100
+    
+    >>> # You can also call (side-effect free) methods of Values to get a
+    >>> # Value-wrapped version of the result which updates when the Value
+    >>> # change:
+    >>> c2 = c.conjugate()
+    >>> c2.value
+    (10-100j)
+    >>> c.value = complex(123, 321)
+    >>> c2.value
+    (123-321)
 
 As well as representing continuous values which change at defined points in
 time ``yarp`` can also represent values which are defined only instantaneously,

@@ -35,9 +35,10 @@ class Value(object):
     affect changes.
     """
     
-    # Note to developers: The magic methods (e.g. __add__) are monkey-patched
-    # into this class in the yarp.python_operators module. This is a little bit
-    # ugly but makes implementation substantially easier.
+    # Note to developers: The magic methods (e.g. __add__, __getattr__ and
+    # __call__) are monkey-patched into this class in the yarp.python_operators
+    # module. This is a little bit ugly but makes implementation substantially
+    # easier/cleaner.
     
     def __init__(self, initial_value = NoValue):
         self._value = initial_value

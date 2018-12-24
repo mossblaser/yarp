@@ -1,7 +1,7 @@
 from mock import Mock
 
 from yarp import NoValue, Value, value_list, value_dict, \
-    add, instantaneous_not_, str_format
+    add, instantaneous_not_, str_format, getattr
 
 def test_operator_wrapper_continous():
     # Only test addition since others are defined in exactly the same way
@@ -51,6 +51,48 @@ def test_str_format_operator():
     
     fmt.value = "0x{:04X}: {!r}"
     assert stringified.value == "0x00BC: 'foo'"
+
+def test_getattr_string_name():
+    # Special attention since this is important
+    m = Mock()
+    m.foo = "bar"
+    v = Value(m)
+    
+    foo_v = getattr(v, "foo")
+    
+    assert isinstance(foo_v, Value)
+    assert foo_v.value == "bar"
+    
+    log = []
+    foo_v.on_value_changed(log.append)
+    
+    m2 = Mock()
+    m2.foo = "baz"
+    v.value = m2
+    
+    assert foo_v.value == "baz"
+    assert log == ["baz"]
+
+def test_getattr_value_name():
+    # Special attention since this is important
+    m = Mock()
+    m.foo = "FOO!"
+    m.bar = "BAR!"
+    v = Value(m)
+    
+    name_v = Value("foo")
+    attr_v = getattr(v, name_v)
+    
+    assert attr_v.value == "FOO!"
+    
+    log = []
+    attr_v.on_value_changed(log.append)
+    
+    name_v.value = "bar"
+    
+    assert attr_v.value == "BAR!"
+    assert log == ["BAR!"]
+
 
 def test_native_value_operators():
     """Not exhaustive but just checks the most valuable ones."""
@@ -103,6 +145,46 @@ def test_native_value_operators():
     assert d_ay.value == -10
     a.value = 10
     assert d_ay.value == 10
+    
+    # Calling and getattring
+    class Cls(object):
+        def __init__(self, n): self.n = n
+        def __call__(self, n2): return self.n + n2
+        def get(self): return self.n
+        @property
+        def n_plus_one(self): return self.n + 1
+    
+    c1 = Cls(1)
+    c2 = Cls(2)
+    av = Value(c1)
+    
+    # Getattr for variable
+    nv = av.n
+    assert nv.value == 1
+    av.value = c2
+    assert nv.value == 2
+    av.value = c1
+    
+    # Getattr for property
+    n_plus_one_v = av.n_plus_one
+    assert n_plus_one_v.value == 2
+    av.value = c2
+    assert n_plus_one_v.value == 3
+    av.value = c1
+    
+    # Calling callable classes
+    ret_v = av(10)
+    assert ret_v.value == 11
+    av.value = c2
+    assert ret_v.value == 12
+    av.value = c1
+    
+    # Calling callable attributes
+    get_v = av.get()
+    assert get_v.value == 1
+    av.value = c2
+    assert get_v.value == 2
+    av.value = c1
 
 def test_operator_wrapper_docstring():
     assert "continous value" in Value.__add__.__doc__.lower()

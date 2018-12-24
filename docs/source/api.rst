@@ -82,6 +82,16 @@ supported:
     * ``int(a)``
     * ``float(a)``
     * ``round(a)``
+* Python object/function usage
+    * ``a(...)`` will call the value as a function and return a
+      :py:class:`Value` containing the result. This value will be updated by
+      re-calling the function whenever the Value changes. Like :py:func:`fn`,
+      arguments may be :py:class:`Value` objects and these will be unwrapped
+      before the function is called and will also cause the function to be
+      re-evaluated whenever they change. Do not use this to call functions with
+      side effects.
+    * ``a.name`` equivalent to ``yarp.getattr(a, "name")``
+
 
 Unfortunately this list *doesn't* include boolean operators (i.e.  ``not``,
 ``and``, ``or`` and ``bool``). This is due to a limitation of the Python data
@@ -124,6 +134,7 @@ Python builtins and functions from the standard library:
     * ``hex(a)``
     * ``zip(a)``
     * ``len(a)``
+    * ``getattr(object, name[, default])``
 * Most non-mutating, non-underscore prefixed functions from the
   :py:mod:`operator` module.
 
@@ -177,3 +188,11 @@ The following function can be used to make *very* persistent
 :py:class:`Value`\ s
 
 .. autofunction:: file_backed_value
+
+Time Values
+-----------
+
+The following function can be used to get the (continously changing) date and
+time:
+
+.. autofunction:: now
