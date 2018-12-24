@@ -1,3 +1,5 @@
+import pytest
+
 from mock import Mock
 
 from yarp import \
@@ -31,6 +33,12 @@ def test_change_callback_only():
     v.set_instantaneous_value(123)
     m.assert_called_once_with(123)
     assert v.value is NoValue
+
+
+@pytest.mark.parametrize("f", [repr, str])
+def test_repr(f):
+    assert f(Value(123)) == "Value(123)"
+    assert f(Value("hi")) == "Value('hi')"
 
 
 def test_value_list_persistent():

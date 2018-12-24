@@ -103,9 +103,15 @@ class Value(object):
         """
         self._on_value_changed.append(cb)
         return cb
+    
+    def __repr__(self):
+        return "Value({})".format(repr(self.value))
+    
+    def __str__(self):
+        return repr(self)
 
 def value_list(list_of_values):
-    """
+    r"""
     Returns a :py:class:`Value` consisting of a fixed list of other
     :py:class:`Values <Value>`. The returned :py:class:`Value` will change
     whenever one of its members does.
@@ -143,7 +149,7 @@ def value_list(list_of_values):
     return output_value
 
 def value_tuple(tuple_of_values):
-    """
+    r"""
     A :py:class:`Value` consisting of a tuple of other :py:class:`Values
     <Value>`.
     
@@ -182,7 +188,7 @@ def value_tuple(tuple_of_values):
     return output_value
 
 def value_dict(dict_of_values):
-    """
+    r"""
     A :py:class:`Value` consisting of a dictionary where the values (but not
     keys) are  :py:class:`Values <Value>`.
     
