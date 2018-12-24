@@ -74,7 +74,7 @@ are automatically reevaluated when changed. For example:
     (10-100j)
     >>> c.value = complex(123, 321)
     >>> c2.value
-    (123-321)
+    (123-321j)
 
 As well as representing continuous values which change at defined points in
 time `yarp` can also represent values which are defined only instantaneously,
