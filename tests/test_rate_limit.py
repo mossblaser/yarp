@@ -7,15 +7,15 @@ from mock import Mock
 from yarp import NoValue, Value, rate_limit
 
 @pytest.mark.asyncio
-async def test_rate_limit_persistent(event_loop):
+async def test_rate_limit_persistent():
     v = Value(1)
     
     # Initial value should be passed through
-    rlv = rate_limit(v, 0.1, event_loop)
+    rlv = rate_limit(v, 0.1)
     assert rlv.value == 1
     
     log = []
-    sem = asyncio.Semaphore(0, loop=event_loop)
+    sem = asyncio.Semaphore(0)
     def on_change(new_value):
         log.append(new_value)
         sem.release()
@@ -35,7 +35,7 @@ async def test_rate_limit_persistent(event_loop):
     assert log[-1] == 2
     
     # After a suitable delay, the next change should come through immediately
-    await asyncio.sleep(0.15, loop=event_loop)
+    await asyncio.sleep(0.15)
     v.value = 3
     assert rlv.value == 3
     assert len(log) == 2
@@ -57,15 +57,15 @@ async def test_rate_limit_persistent(event_loop):
     assert log[-1] == 6
 
 @pytest.mark.asyncio
-async def test_rate_limit_instantaneous(event_loop):
+async def test_rate_limit_instantaneous():
     v = Value()
     
     # No initial value to speak of
-    rlv = rate_limit(v, 0.1, event_loop)
+    rlv = rate_limit(v, 0.1)
     assert rlv.value is NoValue
     
     log = []
-    sem = asyncio.Semaphore(0, loop=event_loop)
+    sem = asyncio.Semaphore(0)
     def on_change(new_value):
         log.append(new_value)
         sem.release()
@@ -92,7 +92,7 @@ async def test_rate_limit_instantaneous(event_loop):
     assert log[-1] == 2
     
     # After a suitable delay, the next change should come through immediately
-    await asyncio.sleep(0.15, loop=event_loop)
+    await asyncio.sleep(0.15)
     v.set_instantaneous_value(3)
     assert rlv.value is NoValue
     assert len(log) == 3
@@ -114,15 +114,15 @@ async def test_rate_limit_instantaneous(event_loop):
     assert log[-1] == 6
 
 @pytest.mark.asyncio
-async def test_rate_limit_min_interval_change(event_loop):
+async def test_rate_limit_min_interval_change():
     v = Value(123)
     mi = Value(0.1)
     
     start = time.time()
-    rlv = rate_limit(v, mi, event_loop)
+    rlv = rate_limit(v, mi)
     
     log = []
-    sem = asyncio.Semaphore(0, loop=event_loop)
+    sem = asyncio.Semaphore(0)
     def on_change(new_value):
         log.append(new_value)
         sem.release()
@@ -154,7 +154,7 @@ async def test_rate_limit_min_interval_change(event_loop):
     # already ellapsed and the value should emmerge immediately
     v.value = 4321
     assert rlv.value == 1234
-    await asyncio.sleep(0.05, loop=event_loop)
+    await asyncio.sleep(0.05)
     assert rlv.value == 1234
     mi.value = 0.025
     assert rlv.value == 4321
@@ -164,7 +164,7 @@ async def test_rate_limit_min_interval_change(event_loop):
     
     # If we ensure blocking is not occurring, changing the time shouldn't cause
     # problems
-    await asyncio.sleep(0.05, loop=event_loop)
+    await asyncio.sleep(0.05)
     mi.value = 0.1
     v.value = 12345
     assert rlv.value == 12345

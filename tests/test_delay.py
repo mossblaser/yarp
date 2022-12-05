@@ -24,9 +24,9 @@ class TestDelayPersistent(object):
         return []
     
     @pytest.fixture
-    def sem(self, event_loop):
+    def sem(self):
         """A semaphore released whenever the callback is called."""
-        return asyncio.Semaphore(0, loop=event_loop)
+        return asyncio.Semaphore(0)
     
     @pytest.fixture
     def dv(self, v, dt, log, sem, event_loop):
@@ -87,7 +87,7 @@ class TestDelayPersistent(object):
         # Changing the delay after a value change has occurred should push that
         # change further into the past, but only relative to its original start
         # time
-        await asyncio.sleep(0.05, loop=event_loop)
+        await asyncio.sleep(0.05)
         dt.value = 0.2
         
         await sem.acquire()
@@ -102,7 +102,7 @@ class TestDelayPersistent(object):
         
         # Changing the delay after a value change has occurred should push that
         # delay closer
-        await asyncio.sleep(0.025, loop=event_loop)
+        await asyncio.sleep(0.025)
         dt.value = 0.05
         
         await sem.acquire()
@@ -117,7 +117,7 @@ class TestDelayPersistent(object):
         
         # Changing the delay such that a still-delayed value should have been
         # output already should cause that value to be output immediately
-        await asyncio.sleep(0.05, loop=event_loop)
+        await asyncio.sleep(0.05)
         dt.value = 0.01
         
         assert len(log) == 1
@@ -128,14 +128,14 @@ class TestDelayPersistent(object):
 class TestDelayInstantaneous(object):
 
     @pytest.mark.asyncio
-    async def test_instantaneous(self, event_loop):
+    async def test_instantaneous(self):
         value = Value()
         
-        delayed_value = delay(value, 0.1, loop=event_loop)
+        delayed_value = delay(value, 0.1)
         assert delayed_value.value is NoValue
         
         # Monitor changes
-        evt = asyncio.Event(loop=event_loop)
+        evt = asyncio.Event()
         m = Mock(side_effect=lambda *_: evt.set())
         delayed_value.on_value_changed(m)
         

@@ -59,11 +59,11 @@ class TestTimeWindow(object):
         return []
     
     @pytest.fixture
-    def sem(self, event_loop):
+    def sem(self):
         """
         A semaphore released whenever the 'win' value changes.
         """
-        return asyncio.Semaphore(0, loop=event_loop)
+        return asyncio.Semaphore(0)
     
     @pytest.fixture
     def win(self, v, dv, sem, log, event_loop):
@@ -94,7 +94,7 @@ class TestTimeWindow(object):
     
     
     @pytest.mark.asyncio
-    async def test_initial_value(self, v, dv, win, sem, log, event_loop):
+    async def test_initial_value(self, v, dv, win, sem, log):
         start = time.time()
         
         # Should start with the current value
@@ -108,7 +108,7 @@ class TestTimeWindow(object):
         assert log[-1][1] == []
     
     @pytest.mark.asyncio
-    async def test_adding_values(self, v, dv, win, sem, log, remove_initial_win_value, event_loop):
+    async def test_adding_values(self, v, dv, win, sem, log, remove_initial_win_value):
         # Adding values should appear immediately and disappear later
         start = time.time()
         v.value = 2
@@ -127,13 +127,13 @@ class TestTimeWindow(object):
         assert log[-1][1] == []
         
     @pytest.mark.asyncio
-    async def test_adding_values_spaced(self, v, dv, win, sem, log, remove_initial_win_value, event_loop):
+    async def test_adding_values_spaced(self, v, dv, win, sem, log, remove_initial_win_value):
         # Adding values spaced appart should disappear spaced appart
         first = time.time()
         v.value = 4
         assert win.value == [4]
         assert len(log) == 1
-        await asyncio.sleep(0.05, loop=event_loop)
+        await asyncio.sleep(0.05)
         
         second = time.time()
         v.value = 5
@@ -153,7 +153,7 @@ class TestTimeWindow(object):
         assert log[-1][1] == []
     
     @pytest.mark.asyncio
-    async def test_increase_timeout(self, v, dv, win, sem, log, remove_initial_win_value, event_loop):
+    async def test_increase_timeout(self, v, dv, win, sem, log, remove_initial_win_value):
         # Insert a couple of values
         start = time.time()
         v.value = 6
@@ -177,7 +177,7 @@ class TestTimeWindow(object):
         assert win.value == []
     
     @pytest.mark.asyncio
-    async def test_decrease_timeout(self, v, dv, win, sem, log, remove_initial_win_value, event_loop):
+    async def test_decrease_timeout(self, v, dv, win, sem, log, remove_initial_win_value):
         # Insert a couple more values
         start = time.time()
         v.value = 8
@@ -201,7 +201,7 @@ class TestTimeWindow(object):
         assert win.value == []
     
     @pytest.mark.asyncio
-    async def test_decrease_timeout_lots(self, v, dv, win, sem, log, remove_initial_win_value, event_loop):
+    async def test_decrease_timeout_lots(self, v, dv, win, sem, log, remove_initial_win_value):
         # Insert a few more values
         start = time.time()
         v.value = 10
@@ -213,7 +213,7 @@ class TestTimeWindow(object):
         assert log[-2][1] == [10]
         assert log[-1][1] == [10, 11]
         
-        await asyncio.sleep(0.05, loop=event_loop)
+        await asyncio.sleep(0.05)
         assert win.value == [10, 11]
         
         # Decreasing the timeout so that the previously inserted items should have
