@@ -165,8 +165,6 @@ def time_window(source_value, duration, loop=None):
                                  expire_value))
         timers = [modify_timeout(t) for t in timers]
     
-    schedule_value_expiration()
-    
     return output_value
 
 def rate_limit(source_value, min_interval=0.1, loop=None):
