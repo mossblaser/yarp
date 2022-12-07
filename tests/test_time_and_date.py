@@ -20,9 +20,9 @@ class TestNow(object):
         return []
     
     @pytest.fixture
-    def sem(self, event_loop):
+    def sem(self):
         """A semaphore released whenever the callback is called."""
-        return asyncio.Semaphore(0, loop=event_loop)
+        return asyncio.Semaphore(0)
     
     @pytest.fixture
     def t(self, interval, log, sem, event_loop):
@@ -42,7 +42,7 @@ class TestNow(object):
         assert abs((t.value - _datetime.datetime.now()).total_seconds()) < 0.05
     
     @pytest.mark.asyncio
-    async def test_regular_interval(self, t, sem, log, event_loop):
+    async def test_regular_interval(self, t, sem, log):
         await sem.acquire()
         await sem.acquire()
         await sem.acquire()
@@ -55,12 +55,12 @@ class TestNow(object):
         assert all(0.05 < t < 0.15 for t in t_deltas)
     
     @pytest.mark.asyncio
-    async def test_change_interval(self, t, interval, sem, log, event_loop):
+    async def test_change_interval(self, t, interval, sem, log):
         await sem.acquire()
         await sem.acquire()
         assert len(log) == 2
         
-        await asyncio.sleep(0.05, loop=event_loop)
+        await asyncio.sleep(0.05)
         interval.value = 0.2
         
         await sem.acquire()
